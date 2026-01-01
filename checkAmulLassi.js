@@ -30,24 +30,22 @@ async function checkAvailability() {
   const page = await browser.newPage();
   await page.goto(PRODUCT_URL, { waitUntil: "networkidle2" });
 
-  // Enter pincode
   await page.waitForSelector("input[type='text']", { timeout: 15000 });
   await page.type("input[type='text']", PINCODE, { delay: 100 });
   await page.keyboard.press("Enter");
 
-  // ✅ Proper wait (FIX)
   await new Promise(resolve => setTimeout(resolve, 5000));
 
   const pageText = await page.evaluate(() => document.body.innerText);
 
-  if (pageText.includes("Add to Cart")) {
-    await sendTelegramMessage(
-      `🔥 <b>Amul High Protein Lassi AVAILABLE</b>\n📍 Pincode: ${PINCODE}\n\n${PRODUCT_URL}`
-    );
-    console.log("AVAILABLE – Telegram sent");
-  } else {
-    console.log("Still out of stock for pincode", PINCODE);
-  }
+  // ✅ ALWAYS SEND MESSAGE (TEST MODE)
+  await sendTelegramMessage(
+    `🧪 <b>TEST ALERT</b>\n\nCron job executed successfully ✅\n📍 Pincode: ${PINCODE}\n\nStatus: ${
+      pageText.includes("Add to Cart") ? "AVAILABLE 🟢" : "OUT OF STOCK 🔴"
+    }\n\n${PRODUCT_URL}`
+  );
+
+  console.log("Telegram test message sent");
 
   await browser.close();
 }
