@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer";
 
 const PRODUCT_URL =
-  "https://shop.amul.com/en/product/amul-high-protein-plain-lassi-200-ml-or-pack-of-30";
+  "https://shop.amul.com/en/product/amul-high-protein-blueberry-shake-200-ml-or-pack-of-30";
 
 const PINCODE = "560068";
 const BOT_TOKEN = process.env.TG_BOT_TOKEN;
