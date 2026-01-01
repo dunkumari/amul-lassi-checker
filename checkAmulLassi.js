@@ -3,7 +3,7 @@ import puppeteer from "puppeteer";
 const PRODUCT_URL =
   "https://shop.amul.com/en/product/amul-kool-protein-milkshake-or-vanilla-180-ml-or-pack-of-30";
 
-const PINCODE = "560012";
+const PINCODE = "560068";
 const BOT_TOKEN = process.env.TG_BOT_TOKEN;
 const CHAT_ID = process.env.TG_CHAT_ID;
 
