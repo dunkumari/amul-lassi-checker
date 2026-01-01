@@ -3,7 +3,7 @@ import puppeteer from "puppeteer";
 const PRODUCT_URL =
   "https://shop.amul.com/en/product/amul-kool-protein-milkshake-or-vanilla-180-ml-or-pack-of-30";
 
-const PINCODE = "560068";
+const PINCODE = "560012";
 const BOT_TOKEN = process.env.TG_BOT_TOKEN;
 const CHAT_ID = process.env.TG_CHAT_ID;
 
@@ -30,22 +30,32 @@ async function checkAvailability() {
   const page = await browser.newPage();
   await page.goto(PRODUCT_URL, { waitUntil: "networkidle2" });
 
-  await page.waitForSelector("input[type='text']", { timeout: 15000 });
+  // Enter pincode
+  await page.waitForSelector("input[type='text']", { timeout: 20000 });
   await page.type("input[type='text']", PINCODE, { delay: 100 });
   await page.keyboard.press("Enter");
 
-  await new Promise(resolve => setTimeout(resolve, 5000));
+  // Wait for Amul API response to update UI
+  await new Promise(resolve => setTimeout(resolve, 7000));
 
-  const pageText = await page.evaluate(() => document.body.innerText);
+  // 🔥 RELIABLE STOCK CHECK
+  const isAvailable = await page.evaluate(() => {
+    const buttons = Array.from(document.querySelectorAll("button"));
+    return buttons.some(btn =>
+      btn.innerText.toLowerCase().includes("add") &&
+      !btn.disabled
+    );
+  });
 
-  // ✅ ALWAYS SEND MESSAGE (TEST MODE)
-  await sendTelegramMessage(
-    `🧪 <b>TEST ALERT</b>\n\nCron job executed successfully ✅\n📍 Pincode: ${PINCODE}\n\nStatus: ${
-      pageText.includes("Add to Cart") ? "AVAILABLE 🟢" : "OUT OF STOCK 🔴"
-    }\n\n${PRODUCT_URL}`
-  );
-
-  console.log("Telegram test message sent");
+  if (isAvailable) {
+    await sendTelegramMessage(
+      `🔥 <b>AMUL LASSI AVAILABLE</b>\n📍 Pincode: ${PINCODE}\n\n${PRODUCT_URL}`
+    );
+  } else {
+    await sendTelegramMessage(
+      `❌ <b>OUT OF STOCK</b>\n📍 Pincode: ${PINCODE}\n\nChecked successfully`
+    );
+  }
 
   await browser.close();
 }
