@@ -23,22 +23,20 @@ async function sendTelegramMessage(message) {
 
 async function checkAvailability() {
   const browser = await puppeteer.launch({
-    headless: "new",
+    headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
   const page = await browser.newPage();
   await page.goto(PRODUCT_URL, { waitUntil: "networkidle2" });
 
-  // 🔹 Enter pincode
+  // Enter pincode
   await page.waitForSelector("input[type='text']", { timeout: 15000 });
-  await page.type("input[type='text']", PINCODE);
-
-  // 🔹 Click check / apply button
+  await page.type("input[type='text']", PINCODE, { delay: 100 });
   await page.keyboard.press("Enter");
 
-  // 🔹 Wait for availability update
-  await page.waitForTimeout(5000);
+  // ✅ Proper wait (FIX)
+  await new Promise(resolve => setTimeout(resolve, 5000));
 
   const pageText = await page.evaluate(() => document.body.innerText);
 
@@ -46,6 +44,7 @@ async function checkAvailability() {
     await sendTelegramMessage(
       `🔥 <b>Amul High Protein Lassi AVAILABLE</b>\n📍 Pincode: ${PINCODE}\n\n${PRODUCT_URL}`
     );
+    console.log("AVAILABLE – Telegram sent");
   } else {
     console.log("Still out of stock for pincode", PINCODE);
   }
@@ -53,5 +52,7 @@ async function checkAvailability() {
   await browser.close();
 }
 
-checkAvailability();
-
+checkAvailability().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
